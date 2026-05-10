@@ -30,8 +30,13 @@ TERMINAL_WINDOW_CLASSES = {
 
 
 def copy_to_clipboard(text: str) -> None:
+    copy_to_selection(text, "clipboard")
+    copy_to_selection(text, "primary")
+
+
+def copy_to_selection(text: str, selection: str) -> None:
     proc = subprocess.Popen(
-        ["xclip", "-selection", "clipboard"],
+        ["xclip", "-selection", selection],
         stdin=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.PIPE,
@@ -44,7 +49,22 @@ def copy_to_clipboard(text: str) -> None:
         # xclip may remain alive as the X11 clipboard owner after it receives input.
         return
     if proc.returncode != 0:
-        raise OutputError((stderr or "xclip failed to write clipboard").strip())
+        raise OutputError((stderr or f"xclip failed to write {selection}").strip())
+
+
+def read_clipboard() -> str | None:
+    result = subprocess.run(["xclip", "-selection", "clipboard", "-o"], capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def wait_for_clipboard_text(text: str, timeout: float = 1.5) -> None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if read_clipboard() == text:
+            return
+        time.sleep(0.05)
 
 
 def paste_from_clipboard(config: AppConfig) -> None:
@@ -103,4 +123,5 @@ def deliver_text(text: str, config: AppConfig) -> None:
         return
     copy_to_clipboard(text)
     if config.output_mode == "clipboard_and_paste":
+        wait_for_clipboard_text(text)
         paste_from_clipboard(config)

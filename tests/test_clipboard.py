@@ -20,6 +20,8 @@ def test_copy_to_clipboard(monkeypatch) -> None:
     clipboard.copy_to_clipboard("hello")
     assert calls[0][0] == ["xclip", "-selection", "clipboard"]
     assert calls[1] == ("hello", 1)
+    assert calls[2][0] == ["xclip", "-selection", "primary"]
+    assert calls[3] == ("hello", 1)
 
 
 def test_copy_to_clipboard_allows_xclip_owner_timeout(monkeypatch) -> None:
@@ -29,6 +31,18 @@ def test_copy_to_clipboard_allows_xclip_owner_timeout(monkeypatch) -> None:
 
     monkeypatch.setattr(clipboard.subprocess, "Popen", lambda *args, **kwargs: FakeProcess())
     clipboard.copy_to_clipboard("hello")
+
+
+def test_wait_for_clipboard_text_retries_until_updated(monkeypatch) -> None:
+    values = iter(["old", "hello"])
+    sleeps = []
+
+    monkeypatch.setattr(clipboard, "read_clipboard", lambda: next(values))
+    monkeypatch.setattr(clipboard.time, "sleep", lambda delay: sleeps.append(delay))
+
+    clipboard.wait_for_clipboard_text("hello")
+
+    assert sleeps == [0.05]
 
 
 def test_stdout_output(capsys) -> None:
