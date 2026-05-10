@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import signal
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -15,9 +16,10 @@ class RecordingIndicator:
     def start(self) -> None:
         if not self.enabled or self.process is not None:
             return
+        command = indicator_command()
         try:
             self.process = subprocess.Popen(
-                [sys.executable, "-m", "whisprlinux.indicator"],
+                command,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -116,6 +118,10 @@ def indicator_asset_path() -> Path:
     return Path(__file__).with_name("assets") / "recording-indicator.png"
 
 
+def gjs_indicator_path() -> Path:
+    return Path(__file__).with_name("indicator-gjs.js")
+
+
 def rounded_rect(canvas: object, x1: int, y1: int, x2: int, y2: int, *, radius: int, **kwargs: object) -> None:
     diameter = radius * 2
     canvas.create_arc(x1, y1, x1 + diameter, y1 + diameter, start=90, extent=90, style="pieslice", **kwargs)
@@ -129,3 +135,9 @@ def rounded_rect(canvas: object, x1: int, y1: int, x2: int, y2: int, *, radius: 
 
 if __name__ == "__main__":
     main()
+def indicator_command() -> list[str]:
+    gjs = shutil.which("gjs")
+    if gjs:
+        return [gjs, str(gjs_indicator_path()), str(indicator_asset_path())]
+    return [sys.executable, "-m", "whisprlinux.indicator"]
+

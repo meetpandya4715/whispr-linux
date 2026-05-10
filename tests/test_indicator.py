@@ -21,6 +21,7 @@ def test_recording_indicator_starts_and_stops_process(monkeypatch) -> None:
         return Process()
 
     monkeypatch.setattr("whisprlinux.indicator.subprocess.Popen", popen)
+    monkeypatch.setattr("whisprlinux.indicator.shutil.which", lambda name: None)
 
     indicator = RecordingIndicator(enabled=True)
     indicator.start()
@@ -28,6 +29,25 @@ def test_recording_indicator_starts_and_stops_process(monkeypatch) -> None:
 
     assert actions[0][0][0][1:] == ["-m", "whisprlinux.indicator"]
     assert actions[1:] == ["terminate", ("wait", 1)]
+
+
+def test_recording_indicator_prefers_gjs_when_available(monkeypatch) -> None:
+    actions = []
+
+    class Process:
+        returncode = 0
+
+    def popen(*args, **kwargs):
+        actions.append((args, kwargs))
+        return Process()
+
+    monkeypatch.setattr("whisprlinux.indicator.subprocess.Popen", popen)
+    monkeypatch.setattr("whisprlinux.indicator.shutil.which", lambda name: "/usr/bin/gjs" if name == "gjs" else None)
+
+    RecordingIndicator(enabled=True).start()
+
+    assert actions[0][0][0][0] == "/usr/bin/gjs"
+    assert actions[0][0][0][1].endswith("indicator-gjs.js")
 
 
 def test_recording_indicator_ignores_startup_failure(monkeypatch) -> None:
@@ -78,9 +98,10 @@ def test_indicator_theme_avoids_chroma_key_window_background() -> None:
 
 
 def test_indicator_asset_exists() -> None:
-    from whisprlinux.indicator import indicator_asset_path
+    from whisprlinux.indicator import gjs_indicator_path, indicator_asset_path
 
     asset = indicator_asset_path()
 
     assert asset.exists()
     assert asset.name == "recording-indicator.png"
+    assert gjs_indicator_path().exists()
