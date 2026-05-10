@@ -66,3 +66,12 @@ def test_rounded_rect_draws_smooth_canvas_shape() -> None:
 
     assert len([call for call in calls if call[0] == "arc"]) == 4
     assert len([call for call in calls if call[0] == "rectangle"]) == 3
+
+
+def test_indicator_theme_uses_transparent_window_background() -> None:
+    from whisprlinux.indicator import indicator_theme
+
+    theme = indicator_theme()
+
+    assert theme["transparent_color"] == "#ff00ff"
+    assert theme["background"] != theme["transparent_color"]

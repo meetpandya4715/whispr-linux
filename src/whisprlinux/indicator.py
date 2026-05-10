@@ -54,23 +54,25 @@ def main() -> None:
     root.withdraw()
     root.overrideredirect(True)
     root.attributes("-topmost", True)
+    theme = indicator_theme()
     try:
-        root.attributes("-alpha", 0.78)
+        root.attributes("-transparentcolor", theme["transparent_color"])
     except tk.TclError:
         pass
     try:
         root.attributes("-type", "notification")
     except tk.TclError:
         pass
-    root.configure(background="#101114")
+    root.configure(background=theme["transparent_color"])
 
-    width = 156
-    height = 42
-    canvas = tk.Canvas(root, width=width, height=height, background="#101114", highlightthickness=0, bd=0)
+    width = 132
+    height = 34
+    canvas = tk.Canvas(root, width=width, height=height, background=theme["transparent_color"], highlightthickness=0, bd=0)
     canvas.pack()
-    rounded_rect(canvas, 1, 1, width - 1, height - 1, radius=20, fill="#202124", outline="#35363a")
-    canvas.create_oval(18, 17, 26, 25, fill="#8ab4f8", outline="")
-    canvas.create_text(88, 21, text="Dictating...", fill="#f1f3f4", font=("Sans", 11), anchor="center")
+    rounded_rect(canvas, 0, 0, width, height, radius=17, fill=theme["shadow"], outline="")
+    rounded_rect(canvas, 1, 1, width - 1, height - 2, radius=16, fill=theme["background"], outline="")
+    canvas.create_oval(14, 14, 20, 20, fill=theme["dot"], outline="")
+    canvas.create_text(76, 17, text="Dictating", fill=theme["text"], font=("Sans", 10), anchor="center")
 
     root.update_idletasks()
     screen_width = root.winfo_screenwidth()
@@ -86,6 +88,16 @@ def main() -> None:
     signal.signal(signal.SIGTERM, close)
     signal.signal(signal.SIGINT, close)
     root.mainloop()
+
+
+def indicator_theme() -> dict[str, str]:
+    return {
+        "transparent_color": "#ff00ff",
+        "shadow": "#000000",
+        "background": "#24262b",
+        "dot": "#7aa2ff",
+        "text": "#f4f5f7",
+    }
 
 
 def rounded_rect(canvas: object, x1: int, y1: int, x2: int, y2: int, *, radius: int, **kwargs: object) -> None:
