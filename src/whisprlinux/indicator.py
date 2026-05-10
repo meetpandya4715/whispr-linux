@@ -57,14 +57,14 @@ def main() -> None:
     root.attributes("-topmost", True)
     theme = indicator_theme()
     try:
-        root.attributes("-transparentcolor", theme["transparent_color"])
+        root.attributes("-alpha", 0.94)
     except tk.TclError:
         pass
     try:
         root.attributes("-type", "notification")
     except tk.TclError:
         pass
-    root.configure(background=theme["transparent_color"])
+    root.configure(background=theme["window_background"])
 
     asset = indicator_asset_path()
     image = None
@@ -75,7 +75,7 @@ def main() -> None:
 
     width = image.width() if image else 132
     height = image.height() if image else 34
-    canvas = tk.Canvas(root, width=width, height=height, background=theme["transparent_color"], highlightthickness=0, bd=0)
+    canvas = tk.Canvas(root, width=width, height=height, background=theme["window_background"], highlightthickness=0, bd=0)
     canvas.pack()
     if image:
         canvas.create_image(0, 0, image=image, anchor="nw")
@@ -104,7 +104,7 @@ def main() -> None:
 
 def indicator_theme() -> dict[str, str]:
     return {
-        "transparent_color": "#ff00ff",
+        "window_background": "#111118",
         "shadow": "#000000",
         "background": "#24262b",
         "dot": "#7aa2ff",
