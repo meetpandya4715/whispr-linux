@@ -25,6 +25,8 @@ uv run pytest -v
 uv run whisprlinux doctor
 ```
 
+For the full live test flow, use `docs/manual-verification.md` after storing a real OpenAI API key.
+
 ## Configuration
 
 Config lives at `~/.config/whisprlinux/config.toml`.

@@ -4,10 +4,11 @@ import os
 import platform
 import shutil
 import subprocess
+from importlib.util import find_spec
 from dataclasses import dataclass
 
 from .config import load_config
-from .secrets import has_openai_key, keyring_available
+from .secrets import get_openai_key, keyring_available
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,8 @@ def run_checks(env: dict[str, str] | None = None) -> list[Check]:
     checks = [
         Check("Python", platform.python_version_tuple() >= ("3", "13"), platform.python_version()),
     ]
+    desktop = env.get("XDG_CURRENT_DESKTOP", "")
+    checks.append(Check("Desktop", bool(desktop), desktop or "unknown desktop"))
     session = env.get("XDG_SESSION_TYPE", "")
     checks.append(Check("Session", session == "x11", f"{session or 'unknown'} {'ok' if session == 'x11' else 'unsupported'}"))
     display = env.get("DISPLAY", "")
@@ -35,13 +38,23 @@ def run_checks(env: dict[str, str] | None = None) -> list[Check]:
             ("Clipboard", "xclip"),
         ]
     )
+    checks.append(
+        Check(
+            "Paste backend",
+            session == "x11" and find_spec("pynput") is not None,
+            "pynput/x11 ok" if session == "x11" and find_spec("pynput") is not None else "requires X11 and pynput",
+        )
+    )
     checks.append(Check("Keyring", keyring_available(), "available" if keyring_available() else "unavailable; use OPENAI_API_KEY for this shell"))
     try:
         load_config()
         checks.append(Check("Config", True, "readable"))
     except Exception as exc:
         checks.append(Check("Config", False, str(exc)))
-    checks.append(Check("API key", has_openai_key(), "available" if has_openai_key() else "missing; run whisprlinux auth set-openai-key"))
+    api_key = get_openai_key()
+    checks.append(Check("API key", bool(api_key), "available" if api_key else "missing; run whisprlinux auth set-openai-key"))
+    if api_key:
+        checks.append(api_connectivity(api_key))
     return checks
 
 
