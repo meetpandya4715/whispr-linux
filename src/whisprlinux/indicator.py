@@ -4,6 +4,7 @@ import signal
 import subprocess
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -65,14 +66,25 @@ def main() -> None:
         pass
     root.configure(background=theme["transparent_color"])
 
-    width = 132
-    height = 34
+    asset = indicator_asset_path()
+    image = None
+    try:
+        image = tk.PhotoImage(file=str(asset))
+    except tk.TclError:
+        image = None
+
+    width = image.width() if image else 132
+    height = image.height() if image else 34
     canvas = tk.Canvas(root, width=width, height=height, background=theme["transparent_color"], highlightthickness=0, bd=0)
     canvas.pack()
-    rounded_rect(canvas, 0, 0, width, height, radius=17, fill=theme["shadow"], outline="")
-    rounded_rect(canvas, 1, 1, width - 1, height - 2, radius=16, fill=theme["background"], outline="")
-    canvas.create_oval(14, 14, 20, 20, fill=theme["dot"], outline="")
-    canvas.create_text(76, 17, text="Dictating", fill=theme["text"], font=("Sans", 10), anchor="center")
+    if image:
+        canvas.create_image(0, 0, image=image, anchor="nw")
+        canvas.image = image
+    else:
+        rounded_rect(canvas, 0, 0, width, height, radius=17, fill=theme["shadow"], outline="")
+        rounded_rect(canvas, 1, 1, width - 1, height - 2, radius=16, fill=theme["background"], outline="")
+        canvas.create_oval(14, 14, 20, 20, fill=theme["dot"], outline="")
+        canvas.create_text(76, 17, text="Dictating", fill=theme["text"], font=("Sans", 10), anchor="center")
 
     root.update_idletasks()
     screen_width = root.winfo_screenwidth()
@@ -98,6 +110,10 @@ def indicator_theme() -> dict[str, str]:
         "dot": "#7aa2ff",
         "text": "#f4f5f7",
     }
+
+
+def indicator_asset_path() -> Path:
+    return Path(__file__).with_name("assets") / "recording-indicator.png"
 
 
 def rounded_rect(canvas: object, x1: int, y1: int, x2: int, y2: int, *, radius: int, **kwargs: object) -> None:

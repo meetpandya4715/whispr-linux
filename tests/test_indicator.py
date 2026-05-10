@@ -75,3 +75,12 @@ def test_indicator_theme_uses_transparent_window_background() -> None:
 
     assert theme["transparent_color"] == "#ff00ff"
     assert theme["background"] != theme["transparent_color"]
+
+
+def test_indicator_asset_exists() -> None:
+    from whisprlinux.indicator import indicator_asset_path
+
+    asset = indicator_asset_path()
+
+    assert asset.exists()
+    assert asset.name == "recording-indicator.png"
