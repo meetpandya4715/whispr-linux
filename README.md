@@ -35,6 +35,8 @@ Config lives at `~/.config/whisprlinux/config.toml`.
 uv run whisprlinux config show
 uv run whisprlinux config set model whisper-1
 uv run whisprlinux config set model gpt-4o-transcribe
+uv run whisprlinux models list
+uv run whisprlinux models choose
 uv run whisprlinux config set output_mode clipboard
 uv run whisprlinux config set output_mode clipboard_and_paste
 uv run whisprlinux config set output_mode stdout

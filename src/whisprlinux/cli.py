@@ -24,9 +24,23 @@ app = typer.Typer(no_args_is_help=True)
 config_app = typer.Typer(help="Manage local configuration.")
 auth_app = typer.Typer(help="Manage API credentials.")
 service_app = typer.Typer(help="Manage the user systemd service.")
+models_app = typer.Typer(help="List and choose transcription models.")
 app.add_typer(config_app, name="config")
 app.add_typer(auth_app, name="auth")
 app.add_typer(service_app, name="service")
+app.add_typer(models_app, name="models")
+
+
+TRANSCRIPTION_MODELS = [
+    {
+        "name": "gpt-4o-transcribe",
+        "description": "Default high-quality OpenAI transcription model.",
+    },
+    {
+        "name": "whisper-1",
+        "description": "Classic Whisper transcription model.",
+    },
+]
 
 
 def version_callback(value: bool) -> None:
@@ -65,6 +79,35 @@ def config_set(key: str, value: str) -> None:
 def config_reset() -> None:
     path = reset_config()
     console.print(f"Reset config at {path}")
+
+
+@models_app.command("list")
+def models_list() -> None:
+    current = load_config().model
+    table = Table("#", "Model", "Current", "Notes")
+    for index, model in enumerate(TRANSCRIPTION_MODELS, start=1):
+        table.add_row(str(index), model["name"], "yes" if model["name"] == current else "", model["description"])
+    console.print(table)
+
+
+@models_app.command("choose")
+def models_choose(
+    number: int | None = typer.Option(None, "--number", "-n", min=1, max=len(TRANSCRIPTION_MODELS), help="Choose a model by list number."),
+    restart: bool = typer.Option(True, "--restart/--no-restart", help="Restart the user service after changing the model."),
+) -> None:
+    models_list()
+    if number is None:
+        number = typer.prompt("Choose model number", type=int)
+    if number < 1 or number > len(TRANSCRIPTION_MODELS):
+        raise typer.BadParameter(f"Choose a number from 1 to {len(TRANSCRIPTION_MODELS)}")
+    selected = TRANSCRIPTION_MODELS[number - 1]["name"]
+    set_config_value("model", selected)
+    console.print(f"Updated model to {selected}")
+    if restart:
+        result = service_action("restart")
+        if result.returncode != 0:
+            raise typer.Exit(result.returncode)
+        console.print("Restarted whisprlinux service.")
 
 
 @auth_app.command("set-openai-key")
