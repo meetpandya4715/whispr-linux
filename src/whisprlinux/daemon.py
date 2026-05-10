@@ -4,7 +4,7 @@ import threading
 from pathlib import Path
 from typing import Callable
 
-from .audio import cleanup_audio, record_until_stopped
+from .audio import RecordingCancelled, cleanup_audio, record_until_stopped
 from .clipboard import deliver_text
 from .config import AppConfig, load_config
 from .input_x11 import run_global_listener
@@ -42,6 +42,9 @@ class DictationSession:
             return
         try:
             self.audio_path = record_until_stopped(self.stop_event, self.config)
+        except RecordingCancelled as exc:
+            self.audio_path = None
+            self.status(f"recording-cancelled: {exc}")
         except Exception as exc:
             self.audio_path = None
             self.status(f"recording-failed: {exc}")

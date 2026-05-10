@@ -15,6 +15,13 @@ class AudioError(RuntimeError):
     pass
 
 
+class RecordingCancelled(AudioError):
+    pass
+
+
+MIN_RECORDING_SECONDS = 0.35
+
+
 def get_default_source() -> str | None:
     result = subprocess.run(["pactl", "get-default-source"], capture_output=True, text=True, check=False)
     return result.stdout.strip() if result.returncode == 0 and result.stdout.strip() else None
@@ -72,17 +79,29 @@ def record_until_stopped(
     temp_dir = Path(tempfile.mkdtemp(prefix="whisprlinux-", dir=tempfile.gettempdir()))
     raw_path = temp_dir / "audio.raw"
     wav_path = out_path or (temp_dir / "audio.wav")
-    proc = subprocess.Popen(parec_command(raw_path, config))
+    started_at = time.monotonic()
+    proc = subprocess.Popen(
+        parec_command(raw_path, config),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
     deadline = time.monotonic() + max_seconds
     while not stop_event.is_set() and time.monotonic() < deadline:
         time.sleep(0.03)
     proc.terminate()
     try:
-        proc.wait(timeout=2)
+        _, stderr = proc.communicate(timeout=2)
     except subprocess.TimeoutExpired:
         proc.kill()
-        proc.wait()
+        _, stderr = proc.communicate()
+    elapsed = time.monotonic() - started_at
     if not raw_path.exists() or raw_path.stat().st_size == 0:
+        if elapsed < MIN_RECORDING_SECONDS:
+            raise RecordingCancelled("Recording was too short. Hold the hotkey while speaking, then release.")
+        detail = (stderr or "").strip()
+        if detail:
+            raise AudioError(f"No microphone audio was captured: {detail}")
         raise AudioError("No microphone audio was captured")
     result = subprocess.run(ffmpeg_command(raw_path, wav_path, config), capture_output=True, text=True, check=False)
     try:
