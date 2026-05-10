@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from whisprlinux.config import default_config, load_config, save_config, set_config_value
+from whisprlinux.config import default_config, format_config, load_config, save_config, set_config_value
 
 
 def test_default_config() -> None:
@@ -17,7 +17,16 @@ def test_save_load_and_nested_creation(tmp_path: Path) -> None:
     path = tmp_path / "nested" / "config.toml"
     save_config(default_config(), path)
     assert path.exists()
+    assert 'audio_source = ""' not in path.read_text()
     assert load_config(path).sample_rate == 16000
+    assert load_config(path).audio_source is None
+
+
+def test_format_config_shows_null_defaults() -> None:
+    rendered = format_config(default_config())
+    assert "audio_source = null" in rendered
+    assert "language = null" in rendered
+    assert "prompt = null" in rendered
 
 
 def test_set_config_value(tmp_path: Path) -> None:

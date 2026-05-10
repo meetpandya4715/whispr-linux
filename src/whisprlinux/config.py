@@ -133,38 +133,54 @@ def set_config_value(key: str, raw_value: str, path: Path | None = None) -> AppC
 def to_toml(data: dict[str, Any] | AppConfig) -> str:
     if isinstance(data, AppConfig):
         data = data.model_dump()
+    return _format_mapping(data, include_none=False)
+
+
+def format_config(data: dict[str, Any] | AppConfig) -> str:
+    if isinstance(data, AppConfig):
+        data = data.model_dump()
+    return _format_mapping(data, include_none=True)
+
+
+def _format_mapping(data: dict[str, Any], *, include_none: bool) -> str:
     lines: list[str] = []
     nested: list[tuple[str, dict[str, Any]]] = []
     for key, value in data.items():
+        if value is None and not include_none:
+            continue
         if isinstance(value, dict):
             nested.append((key, value))
         else:
-            lines.append(f"{key} = {_format_toml(value)}")
+            lines.append(f"{key} = {_format_toml(value, include_none=include_none)}")
     for section, values in nested:
         if not values:
             lines.append(f"{section} = {{}}")
             continue
         lines.append("")
-        _write_section(lines, section, values)
+        _write_section(lines, section, values, include_none=include_none)
     return "\n".join(lines).strip() + "\n"
 
 
-def _write_section(lines: list[str], name: str, values: dict[str, Any]) -> None:
-    scalar = {k: v for k, v in values.items() if not isinstance(v, dict)}
+def _write_section(lines: list[str], name: str, values: dict[str, Any], *, include_none: bool) -> None:
+    scalar = {k: v for k, v in values.items() if not isinstance(v, dict) and (v is not None or include_none)}
     nested = {k: v for k, v in values.items() if isinstance(v, dict)}
     if scalar:
         lines.append(f"[{name}]")
         for key, value in scalar.items():
-            lines.append(f"{key} = {_format_toml(value)}")
+            lines.append(f"{key} = {_format_toml(value, include_none=include_none)}")
     for key, value in nested.items():
         lines.append(f"[{name}.{key}]")
         for sub_key, sub_value in value.items():
-            lines.append(f"{sub_key} = {_format_toml(sub_value)}")
+            if sub_value is None and not include_none:
+                continue
+            lines.append(f"{sub_key} = {_format_toml(sub_value, include_none=include_none)}")
 
 
-def _format_toml(value: Any) -> str:
+def _format_toml(value: Any, *, include_none: bool) -> str:
     if value is None:
-        return '""'
+        if include_none:
+            return "null"
+        raise TypeError("None values cannot be written to TOML")
     if isinstance(value, bool):
         return "true" if value else "false"
     if isinstance(value, int):

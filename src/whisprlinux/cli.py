@@ -11,7 +11,7 @@ from rich.table import Table
 from . import __version__
 from .audio import record_for_seconds
 from .clipboard import deliver_text
-from .config import config_path, load_config, reset_config, save_config, set_config_value, to_toml
+from .config import config_path, format_config, load_config, reset_config, set_config_value
 from .daemon import run_daemon
 from .doctor import api_connectivity, run_checks
 from .providers.registry import provider_for_config
@@ -49,7 +49,7 @@ def config_path_command() -> None:
 
 @config_app.command("show")
 def config_show() -> None:
-    console.print(to_toml(load_config()))
+    console.print(format_config(load_config()))
 
 
 @config_app.command("set")

@@ -7,4 +7,5 @@ build/
 *.wav
 *.raw
 *.log
+.env
 .worktrees/
