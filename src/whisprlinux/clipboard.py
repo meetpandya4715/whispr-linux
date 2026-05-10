@@ -11,9 +11,21 @@ class OutputError(RuntimeError):
 
 
 def copy_to_clipboard(text: str) -> None:
-    result = subprocess.run(["xclip", "-selection", "clipboard"], input=text, text=True, capture_output=True, check=False)
-    if result.returncode != 0:
-        raise OutputError("xclip failed to write clipboard")
+    proc = subprocess.Popen(
+        ["xclip", "-selection", "clipboard"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+        start_new_session=True,
+    )
+    try:
+        _, stderr = proc.communicate(text, timeout=1)
+    except subprocess.TimeoutExpired:
+        # xclip may remain alive as the X11 clipboard owner after it receives input.
+        return
+    if proc.returncode != 0:
+        raise OutputError((stderr or "xclip failed to write clipboard").strip())
 
 
 def paste_from_clipboard(delay_ms: int = 120) -> None:
