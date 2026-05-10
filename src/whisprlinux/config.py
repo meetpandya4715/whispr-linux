@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 ProviderName = Literal["openai", "fake"]
 OutputMode = Literal["clipboard", "clipboard_and_paste", "stdout"]
+PasteStrategy = Literal["auto", "ctrl_v", "ctrl_shift_v"]
 
 
 class AppConfig(BaseModel):
@@ -27,6 +28,7 @@ class AppConfig(BaseModel):
     language: str | None = None
     prompt: str | None = None
     paste_delay_ms: int = 120
+    paste_strategy: PasteStrategy = "auto"
     notify: bool = True
     debug_keep_audio: bool = False
     providers: dict[str, dict[str, Any]] = Field(default_factory=dict)

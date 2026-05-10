@@ -38,7 +38,10 @@ uv run whisprlinux config set model gpt-4o-transcribe
 uv run whisprlinux config set output_mode clipboard
 uv run whisprlinux config set output_mode clipboard_and_paste
 uv run whisprlinux config set output_mode stdout
+uv run whisprlinux config set paste_strategy auto
 ```
+
+`paste_strategy = "auto"` uses `Ctrl+V` in browsers and editors, and `Ctrl+Shift+V` in terminal windows such as Ghostty and GNOME Terminal. You can force either behavior with `ctrl_v` or `ctrl_shift_v`.
 
 Secrets are stored through the desktop keyring using service `whisprlinux` and username `openai_api_key`. If no keyring is available, use `OPENAI_API_KEY` only for the current shell session.
 

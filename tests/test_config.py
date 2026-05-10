@@ -11,6 +11,7 @@ def test_default_config() -> None:
     assert config.model == "gpt-4o-transcribe"
     assert config.hotkey == "ctrl+super"
     assert config.output_mode == "clipboard_and_paste"
+    assert config.paste_strategy == "auto"
 
 
 def test_save_load_and_nested_creation(tmp_path: Path) -> None:
