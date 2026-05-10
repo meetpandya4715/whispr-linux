@@ -14,6 +14,8 @@ def test_default_config() -> None:
     assert config.paste_strategy == "auto"
     assert config.recording_indicator is True
     assert config.recording_tail_padding_ms == 450
+    assert config.silence_rms_threshold == 120
+    assert config.silence_peak_threshold == 600
 
 
 def test_save_load_and_nested_creation(tmp_path: Path) -> None:

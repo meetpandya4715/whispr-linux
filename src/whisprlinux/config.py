@@ -33,9 +33,19 @@ class AppConfig(BaseModel):
     notify: bool = True
     recording_indicator: bool = True
     debug_keep_audio: bool = False
+    silence_rms_threshold: int = 120
+    silence_peak_threshold: int = 600
     providers: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
-    @field_validator("sample_rate", "channels", "recording_max_seconds", "recording_tail_padding_ms", "paste_delay_ms")
+    @field_validator(
+        "sample_rate",
+        "channels",
+        "recording_max_seconds",
+        "recording_tail_padding_ms",
+        "paste_delay_ms",
+        "silence_rms_threshold",
+        "silence_peak_threshold",
+    )
     @classmethod
     def positive_ints(cls, value: int) -> int:
         if value <= 0:

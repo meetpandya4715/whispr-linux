@@ -56,6 +56,8 @@ uv run whisprlinux config set output_mode clipboard_and_paste
 uv run whisprlinux config set paste_strategy auto
 uv run whisprlinux config set recording_indicator true
 uv run whisprlinux config set recording_tail_padding_ms 450
+uv run whisprlinux config set silence_rms_threshold 120
+uv run whisprlinux config set silence_peak_threshold 600
 
 uv run whisprlinux record-test --seconds 3 --out /tmp/whisprlinux-test.wav
 uv run whisprlinux transcribe-file /tmp/whisprlinux-test.wav
@@ -97,6 +99,8 @@ uv run whisprlinux config set output_mode stdout
 uv run whisprlinux config set paste_strategy auto
 uv run whisprlinux config set recording_indicator true
 uv run whisprlinux config set recording_tail_padding_ms 450
+uv run whisprlinux config set silence_rms_threshold 120
+uv run whisprlinux config set silence_peak_threshold 600
 ```
 
 Useful output modes:
@@ -115,6 +119,8 @@ Paste strategies:
 `recording_indicator = true` shows a small, subtle `Dictating...` popup near the bottom of the screen while the hotkey is held. If Tk is not available, dictation still works without the visual indicator.
 
 `recording_tail_padding_ms` keeps recording briefly after hotkey release so the last syllables are not cut off by audio buffering or a fast release. Increase it slightly if transcripts still miss the end of a sentence.
+
+`silence_rms_threshold` and `silence_peak_threshold` prevent silent recordings from being sent for transcription. Increase them if background noise still produces random text; lower them if very quiet speech is ignored.
 
 If terminal paste does not work:
 
@@ -161,6 +167,7 @@ Audio is sent to OpenAI for transcription. Local temporary audio files are remov
 - For microphone issues, run `pactl get-default-source` and `uv run whisprlinux record-test --seconds 3 --out /tmp/whisprlinux-test.wav`.
 - For paste failures, try `uv run whisprlinux config set output_mode clipboard` to confirm transcription works before debugging paste.
 - For terminal paste failures, set `paste_strategy` to `shift_insert`.
+- If silence produces random text, increase `silence_rms_threshold` and `silence_peak_threshold` a little.
 - If the recording indicator does not appear, install `python3-tk`; dictation can still run without it.
 - For API errors, run `uv run whisprlinux auth test-openai-key` and try a supported model.
 

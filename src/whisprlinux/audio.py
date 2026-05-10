@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from array import array
 from pathlib import Path
 
 from .config import AppConfig
@@ -106,6 +107,8 @@ def record_until_stopped(
         if detail:
             raise AudioError(f"No microphone audio was captured: {detail}")
         raise AudioError("No microphone audio was captured")
+    if not audio_has_voice(raw_path, config):
+        raise RecordingCancelled("No speech detected. Nothing was transcribed.")
     result = subprocess.run(ffmpeg_command(raw_path, wav_path, config), capture_output=True, text=True, check=False)
     try:
         raw_path.unlink(missing_ok=True)
@@ -114,6 +117,21 @@ def record_until_stopped(
     if result.returncode != 0:
         raise AudioError("ffmpeg failed to convert captured audio")
     return wav_path
+
+
+def audio_has_voice(raw_path: Path, config: AppConfig) -> bool:
+    data = raw_path.read_bytes()
+    if len(data) < 2:
+        return False
+    if len(data) % 2:
+        data = data[:-1]
+    samples = array("h")
+    samples.frombytes(data)
+    if os.sys.byteorder != "little":
+        samples.byteswap()
+    peak = max(abs(sample) for sample in samples)
+    rms = int((sum(sample * sample for sample in samples) / len(samples)) ** 0.5)
+    return rms >= config.silence_rms_threshold and peak >= config.silence_peak_threshold
 
 
 def cleanup_audio(path: Path, config: AppConfig) -> None:
