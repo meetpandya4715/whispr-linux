@@ -50,14 +50,16 @@ git status --short --ignored
 - `record-test` creates a 16-bit mono 16000 Hz WAV at `/tmp/whisprlinux-test.wav`.
 - `transcribe-file /tmp/whisprlinux-test.wav` returned text through OpenAI.
 - Clipboard-only output was verified with `paste-test "hello from whisprlinux"` followed by `xclip -selection clipboard -o`.
+- `daemon --foreground` was exercised with simulated X11 `ctrl+super` key events; it printed `recording-started`, `recording-stopped`, `transcribing`, and `text-delivered`.
+- After the simulated daemon run, `xclip -selection clipboard -o` returned the delivered transcription text, proving release-to-clipboard behavior.
 - User service installation and lifecycle commands have been exercised; the service is installed and currently stopped.
 - `.env` is ignored and must not be committed or inspected as a source artifact.
 
 ## Remaining Gates
 
-These gates cannot be honestly marked complete without live desktop interaction:
+These gates cannot be honestly marked complete without live desktop interaction by the user:
 
-- `uv run whisprlinux daemon --foreground` plus holding the configured chord and confirming text appears in the active application
-- `clipboard_and_paste` mode verified in a real text editor after OpenAI transcription succeeds
+- Physically holding the configured chord and confirming it behaves the same as the simulated X11 event test
+- `clipboard_and_paste` mode verified in a real text editor or safe active input field
 
 Completion status: incomplete until the remaining gates pass.
