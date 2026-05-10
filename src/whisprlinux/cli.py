@@ -34,18 +34,22 @@ app.add_typer(models_app, name="models")
 TRANSCRIPTION_MODELS = [
     {
         "name": "gpt-4o-transcribe",
+        "pricing": "$0.006/min",
         "description": "High-quality OpenAI transcription model.",
     },
     {
         "name": "gpt-4o-mini-transcribe",
+        "pricing": "$0.003/min",
         "description": "Smaller OpenAI transcription model for lower latency and cost.",
     },
     {
         "name": "gpt-4o-transcribe-diarize",
+        "pricing": "$0.006/min",
         "description": "Transcription model with speaker diarization for multi-speaker audio.",
     },
     {
         "name": "whisper-1",
+        "pricing": "$0.006/min",
         "description": "Classic Whisper transcription model.",
     },
 ]
@@ -92,9 +96,20 @@ def config_reset() -> None:
 @models_app.command("list")
 def models_list() -> None:
     current = load_config().model
-    table = Table("#", "Model", "Current", "Notes")
+    table = Table()
+    table.add_column("#", no_wrap=True)
+    table.add_column("Model", no_wrap=True)
+    table.add_column("Current", no_wrap=True)
+    table.add_column("Pricing", no_wrap=True)
+    table.add_column("Notes")
     for index, model in enumerate(TRANSCRIPTION_MODELS, start=1):
-        table.add_row(str(index), model["name"], "yes" if model["name"] == current else "", model["description"])
+        table.add_row(
+            str(index),
+            model["name"],
+            "yes" if model["name"] == current else "",
+            model["pricing"],
+            model["description"],
+        )
     console.print(table)
 
 

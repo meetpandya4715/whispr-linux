@@ -25,7 +25,9 @@ def test_models_list_shows_transcription_models() -> None:
     result = CliRunner().invoke(app, ["models", "list"])
     assert result.exit_code == 0
     assert "gpt-4o-transcribe" in result.output
+    assert "$0.006/min" in result.output
     assert "gpt-4o-mini-transcribe" in result.output
+    assert "$0.003/min" in result.output
     assert "gpt-4o-transcribe-diarize" in result.output
     assert "whisper-1" in result.output
 

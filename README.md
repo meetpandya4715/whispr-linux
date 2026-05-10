@@ -44,7 +44,7 @@ uv run whisprlinux config set output_mode stdout
 uv run whisprlinux config set paste_strategy auto
 ```
 
-Supported OpenAI transcription models are `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `gpt-4o-transcribe-diarize`, and `whisper-1`.
+Supported OpenAI transcription models are `gpt-4o-transcribe` (`$0.006/min`), `gpt-4o-mini-transcribe` (`$0.003/min`), `gpt-4o-transcribe-diarize` (`$0.006/min`), and `whisper-1` (`$0.006/min`). Pricing is the public estimated transcription cost per minute.
 
 `paste_strategy = "auto"` uses `Ctrl+V` in browsers and editors, and `Ctrl+Shift+V` in terminal windows such as Ghostty and GNOME Terminal. You can force either behavior with `ctrl_v` or `ctrl_shift_v`.
 If terminal paste still does not trigger, use `shift_insert`, which many terminals and text fields accept:
