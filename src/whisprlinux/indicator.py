@@ -62,22 +62,17 @@ def main() -> None:
         root.attributes("-type", "notification")
     except tk.TclError:
         pass
-    root.configure(background="#202124")
+    root.configure(background="#101114")
 
-    frame = tk.Frame(root, background="#202124", padx=18, pady=8)
-    frame.pack()
-    label = tk.Label(
-        frame,
-        text="Dictating...",
-        background="#202124",
-        foreground="#f1f3f4",
-        font=("Sans", 11),
-    )
-    label.pack()
+    width = 156
+    height = 42
+    canvas = tk.Canvas(root, width=width, height=height, background="#101114", highlightthickness=0, bd=0)
+    canvas.pack()
+    rounded_rect(canvas, 1, 1, width - 1, height - 1, radius=20, fill="#202124", outline="#35363a")
+    canvas.create_oval(18, 17, 26, 25, fill="#8ab4f8", outline="")
+    canvas.create_text(88, 21, text="Dictating...", fill="#f1f3f4", font=("Sans", 11), anchor="center")
 
     root.update_idletasks()
-    width = root.winfo_reqwidth()
-    height = root.winfo_reqheight()
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     x = max((screen_width - width) // 2, 0)
@@ -91,6 +86,17 @@ def main() -> None:
     signal.signal(signal.SIGTERM, close)
     signal.signal(signal.SIGINT, close)
     root.mainloop()
+
+
+def rounded_rect(canvas: object, x1: int, y1: int, x2: int, y2: int, *, radius: int, **kwargs: object) -> None:
+    diameter = radius * 2
+    canvas.create_arc(x1, y1, x1 + diameter, y1 + diameter, start=90, extent=90, style="pieslice", **kwargs)
+    canvas.create_arc(x2 - diameter, y1, x2, y1 + diameter, start=0, extent=90, style="pieslice", **kwargs)
+    canvas.create_arc(x2 - diameter, y2 - diameter, x2, y2, start=270, extent=90, style="pieslice", **kwargs)
+    canvas.create_arc(x1, y2 - diameter, x1 + diameter, y2, start=180, extent=90, style="pieslice", **kwargs)
+    canvas.create_rectangle(x1 + radius, y1, x2 - radius, y2, **kwargs)
+    canvas.create_rectangle(x1, y1 + radius, x2, y2 - radius, **kwargs)
+    canvas.create_rectangle(x1 + radius, y1 + radius, x2 - radius, y2 - radius, **kwargs)
 
 
 if __name__ == "__main__":

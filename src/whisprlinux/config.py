@@ -25,6 +25,7 @@ class AppConfig(BaseModel):
     sample_rate: int = 16000
     channels: int = 1
     recording_max_seconds: int = 120
+    recording_tail_padding_ms: int = 450
     language: str | None = None
     prompt: str | None = None
     paste_delay_ms: int = 120
@@ -34,7 +35,7 @@ class AppConfig(BaseModel):
     debug_keep_audio: bool = False
     providers: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
-    @field_validator("sample_rate", "channels", "recording_max_seconds", "paste_delay_ms")
+    @field_validator("sample_rate", "channels", "recording_max_seconds", "recording_tail_padding_ms", "paste_delay_ms")
     @classmethod
     def positive_ints(cls, value: int) -> int:
         if value <= 0:

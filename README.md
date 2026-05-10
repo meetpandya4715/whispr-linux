@@ -55,6 +55,7 @@ uv run whisprlinux config set hotkey ctrl+super
 uv run whisprlinux config set output_mode clipboard_and_paste
 uv run whisprlinux config set paste_strategy auto
 uv run whisprlinux config set recording_indicator true
+uv run whisprlinux config set recording_tail_padding_ms 450
 
 uv run whisprlinux record-test --seconds 3 --out /tmp/whisprlinux-test.wav
 uv run whisprlinux transcribe-file /tmp/whisprlinux-test.wav
@@ -95,6 +96,7 @@ uv run whisprlinux config set output_mode clipboard_and_paste
 uv run whisprlinux config set output_mode stdout
 uv run whisprlinux config set paste_strategy auto
 uv run whisprlinux config set recording_indicator true
+uv run whisprlinux config set recording_tail_padding_ms 450
 ```
 
 Useful output modes:
@@ -111,6 +113,8 @@ Paste strategies:
 - `shift_insert`: use `Shift+Insert`, useful for Ghostty/GNOME Terminal edge cases
 
 `recording_indicator = true` shows a small, subtle `Dictating...` popup near the bottom of the screen while the hotkey is held. If Tk is not available, dictation still works without the visual indicator.
+
+`recording_tail_padding_ms` keeps recording briefly after hotkey release so the last syllables are not cut off by audio buffering or a fast release. Increase it slightly if transcripts still miss the end of a sentence.
 
 If terminal paste does not work:
 

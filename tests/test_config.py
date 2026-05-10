@@ -13,6 +13,7 @@ def test_default_config() -> None:
     assert config.output_mode == "clipboard_and_paste"
     assert config.paste_strategy == "auto"
     assert config.recording_indicator is True
+    assert config.recording_tail_padding_ms == 450
 
 
 def test_save_load_and_nested_creation(tmp_path: Path) -> None:

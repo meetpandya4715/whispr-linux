@@ -89,13 +89,16 @@ def record_until_stopped(
     deadline = time.monotonic() + max_seconds
     while not stop_event.is_set() and time.monotonic() < deadline:
         time.sleep(0.03)
+    elapsed_before_tail = time.monotonic() - started_at
+    if stop_event.is_set() and elapsed_before_tail >= MIN_RECORDING_SECONDS:
+        time.sleep(config.recording_tail_padding_ms / 1000)
     proc.terminate()
     try:
         _, stderr = proc.communicate(timeout=2)
     except subprocess.TimeoutExpired:
         proc.kill()
         _, stderr = proc.communicate()
-    elapsed = time.monotonic() - started_at
+    elapsed = max(elapsed_before_tail, time.monotonic() - started_at)
     if not raw_path.exists() or raw_path.stat().st_size == 0:
         if elapsed < MIN_RECORDING_SECONDS:
             raise RecordingCancelled("Recording was too short. Hold the hotkey while speaking, then release.")

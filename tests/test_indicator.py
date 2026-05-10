@@ -48,3 +48,21 @@ def test_recording_indicator_can_be_disabled(monkeypatch) -> None:
     monkeypatch.setattr("whisprlinux.indicator.subprocess.Popen", fail)
 
     RecordingIndicator(enabled=False).start()
+
+
+def test_rounded_rect_draws_smooth_canvas_shape() -> None:
+    calls = []
+
+    class Canvas:
+        def create_arc(self, *args, **kwargs):
+            calls.append(("arc", args, kwargs))
+
+        def create_rectangle(self, *args, **kwargs):
+            calls.append(("rectangle", args, kwargs))
+
+    from whisprlinux.indicator import rounded_rect
+
+    rounded_rect(Canvas(), 0, 0, 100, 40, radius=16, fill="#111111", outline="")
+
+    assert len([call for call in calls if call[0] == "arc"]) == 4
+    assert len([call for call in calls if call[0] == "rectangle"]) == 3
