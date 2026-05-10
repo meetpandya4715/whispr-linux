@@ -28,3 +28,27 @@ def test_daemon_treats_short_recording_as_cancelled(monkeypatch) -> None:
     session._record()
     assert session.audio_path is None
     assert statuses == ["recording-cancelled: too short"]
+
+
+def test_daemon_shows_indicator_while_recording(monkeypatch) -> None:
+    actions = []
+
+    class Indicator:
+        def __init__(self, enabled: bool) -> None:
+            actions.append(("init", enabled))
+
+        def start(self) -> None:
+            actions.append(("start", None))
+
+        def stop(self) -> None:
+            actions.append(("stop", None))
+
+    monkeypatch.setattr("whisprlinux.daemon.RecordingIndicator", Indicator)
+    monkeypatch.setattr("whisprlinux.daemon.record_until_stopped", lambda *args, **kwargs: None)
+    monkeypatch.setattr("whisprlinux.daemon.threading.Thread", lambda target, daemon: type("Thread", (), {"start": target, "is_alive": lambda self: False, "join": lambda self, timeout=None: None})())
+    session = DictationSession(default_config(), status=lambda message: None)
+
+    session.start_recording()
+    session.stop_recording()
+
+    assert actions == [("init", True), ("start", None), ("stop", None)]

@@ -10,6 +10,7 @@ It is designed for people who want Wispr Flow-style dictation on Linux without r
 - OpenAI cloud transcription, including `gpt-4o-transcribe` and `gpt-4o-mini-transcribe`
 - Clipboard-only, paste-at-cursor, and stdout output modes
 - Paste handling for browsers, editors, Ghostty, and GNOME Terminal
+- Subtle on-screen recording indicator while the hotkey is held
 - User-level `systemd` service, no sudo required to run the daemon
 - API key storage through the desktop keyring, with `OPENAI_API_KEY` fallback
 - CLI diagnostics for microphone, X11, clipboard, keyring, and OpenAI connectivity
@@ -22,12 +23,13 @@ It is designed for people who want Wispr Flow-style dictation on Linux without r
 - `uv`
 - OpenAI API key with billing enabled
 - System tools: `pactl`, `parec`, `ffmpeg`, and `xclip`
+- Optional but recommended: Tk support for the on-screen recording indicator
 
 Install the system tools:
 
 ```bash
 sudo apt update
-sudo apt install ffmpeg pulseaudio-utils xclip
+sudo apt install ffmpeg pulseaudio-utils xclip python3-tk
 ```
 
 Install `uv` if you do not have it:
@@ -52,6 +54,7 @@ uv run whisprlinux config set language en
 uv run whisprlinux config set hotkey ctrl+super
 uv run whisprlinux config set output_mode clipboard_and_paste
 uv run whisprlinux config set paste_strategy auto
+uv run whisprlinux config set recording_indicator true
 
 uv run whisprlinux record-test --seconds 3 --out /tmp/whisprlinux-test.wav
 uv run whisprlinux transcribe-file /tmp/whisprlinux-test.wav
@@ -91,6 +94,7 @@ uv run whisprlinux config set output_mode clipboard
 uv run whisprlinux config set output_mode clipboard_and_paste
 uv run whisprlinux config set output_mode stdout
 uv run whisprlinux config set paste_strategy auto
+uv run whisprlinux config set recording_indicator true
 ```
 
 Useful output modes:
@@ -105,6 +109,8 @@ Paste strategies:
 - `ctrl_v`: always use `Ctrl+V`
 - `ctrl_shift_v`: always use `Ctrl+Shift+V`
 - `shift_insert`: use `Shift+Insert`, useful for Ghostty/GNOME Terminal edge cases
+
+`recording_indicator = true` shows a small, subtle `Dictating...` popup near the bottom of the screen while the hotkey is held. If Tk is not available, dictation still works without the visual indicator.
 
 If terminal paste does not work:
 
@@ -151,6 +157,7 @@ Audio is sent to OpenAI for transcription. Local temporary audio files are remov
 - For microphone issues, run `pactl get-default-source` and `uv run whisprlinux record-test --seconds 3 --out /tmp/whisprlinux-test.wav`.
 - For paste failures, try `uv run whisprlinux config set output_mode clipboard` to confirm transcription works before debugging paste.
 - For terminal paste failures, set `paste_strategy` to `shift_insert`.
+- If the recording indicator does not appear, install `python3-tk`; dictation can still run without it.
 - For API errors, run `uv run whisprlinux auth test-openai-key` and try a supported model.
 
 ## Development

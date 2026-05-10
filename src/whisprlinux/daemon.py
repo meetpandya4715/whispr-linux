@@ -7,6 +7,7 @@ from typing import Callable
 from .audio import RecordingCancelled, cleanup_audio, record_until_stopped
 from .clipboard import deliver_text
 from .config import AppConfig, load_config
+from .indicator import RecordingIndicator
 from .input_x11 import run_global_listener
 from .notify import notify
 from .providers.base import ProviderError
@@ -20,11 +21,13 @@ class DictationSession:
         self.stop_event: threading.Event | None = None
         self.worker: threading.Thread | None = None
         self.audio_path: Path | None = None
+        self.indicator = RecordingIndicator(enabled=self.config.recording_indicator)
 
     def start_recording(self) -> None:
         if self.worker and self.worker.is_alive():
             return
         self.status("recording-started")
+        self.indicator.start()
         self.stop_event = threading.Event()
         self.worker = threading.Thread(target=self._record, daemon=True)
         self.worker.start()
@@ -34,6 +37,7 @@ class DictationSession:
             self.stop_event.set()
         if self.worker:
             self.worker.join(timeout=self.config.recording_max_seconds + 5)
+        self.indicator.stop()
         self.status("recording-stopped")
         self._transcribe_and_deliver()
 

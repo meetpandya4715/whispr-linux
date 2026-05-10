@@ -30,6 +30,7 @@ class AppConfig(BaseModel):
     paste_delay_ms: int = 120
     paste_strategy: PasteStrategy = "auto"
     notify: bool = True
+    recording_indicator: bool = True
     debug_keep_audio: bool = False
     providers: dict[str, dict[str, Any]] = Field(default_factory=dict)
 

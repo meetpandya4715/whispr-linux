@@ -1,0 +1,50 @@
+from __future__ import annotations
+
+from whisprlinux.indicator import RecordingIndicator
+
+
+def test_recording_indicator_starts_and_stops_process(monkeypatch) -> None:
+    actions = []
+
+    class Process:
+        returncode = None
+
+        def terminate(self) -> None:
+            actions.append("terminate")
+
+        def wait(self, timeout: float | None = None) -> None:
+            actions.append(("wait", timeout))
+            self.returncode = 0
+
+    def popen(*args, **kwargs):
+        actions.append((args, kwargs))
+        return Process()
+
+    monkeypatch.setattr("whisprlinux.indicator.subprocess.Popen", popen)
+
+    indicator = RecordingIndicator(enabled=True)
+    indicator.start()
+    indicator.stop()
+
+    assert actions[0][0][0][1:] == ["-m", "whisprlinux.indicator"]
+    assert actions[1:] == ["terminate", ("wait", 1)]
+
+
+def test_recording_indicator_ignores_startup_failure(monkeypatch) -> None:
+    def fail(*args, **kwargs):
+        raise OSError("no display")
+
+    monkeypatch.setattr("whisprlinux.indicator.subprocess.Popen", fail)
+
+    indicator = RecordingIndicator(enabled=True)
+    indicator.start()
+    indicator.stop()
+
+
+def test_recording_indicator_can_be_disabled(monkeypatch) -> None:
+    def fail(*args, **kwargs):
+        raise AssertionError("should not start")
+
+    monkeypatch.setattr("whisprlinux.indicator.subprocess.Popen", fail)
+
+    RecordingIndicator(enabled=False).start()

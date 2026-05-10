@@ -12,6 +12,7 @@ def test_default_config() -> None:
     assert config.hotkey == "ctrl+super"
     assert config.output_mode == "clipboard_and_paste"
     assert config.paste_strategy == "auto"
+    assert config.recording_indicator is True
 
 
 def test_save_load_and_nested_creation(tmp_path: Path) -> None:
