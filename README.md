@@ -33,15 +33,18 @@ Config lives at `~/.config/whisprlinux/config.toml`.
 
 ```bash
 uv run whisprlinux config show
-uv run whisprlinux config set model whisper-1
-uv run whisprlinux config set model gpt-4o-transcribe
 uv run whisprlinux models list
 uv run whisprlinux models choose
+uv run whisprlinux config set model gpt-4o-mini-transcribe
+uv run whisprlinux config set model whisper-1
+uv run whisprlinux config set model gpt-4o-transcribe
 uv run whisprlinux config set output_mode clipboard
 uv run whisprlinux config set output_mode clipboard_and_paste
 uv run whisprlinux config set output_mode stdout
 uv run whisprlinux config set paste_strategy auto
 ```
+
+Supported OpenAI transcription models are `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `gpt-4o-transcribe-diarize`, and `whisper-1`.
 
 `paste_strategy = "auto"` uses `Ctrl+V` in browsers and editors, and `Ctrl+Shift+V` in terminal windows such as Ghostty and GNOME Terminal. You can force either behavior with `ctrl_v` or `ctrl_shift_v`.
 If terminal paste still does not trigger, use `shift_insert`, which many terminals and text fields accept:

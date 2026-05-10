@@ -34,7 +34,15 @@ app.add_typer(models_app, name="models")
 TRANSCRIPTION_MODELS = [
     {
         "name": "gpt-4o-transcribe",
-        "description": "Default high-quality OpenAI transcription model.",
+        "description": "High-quality OpenAI transcription model.",
+    },
+    {
+        "name": "gpt-4o-mini-transcribe",
+        "description": "Smaller OpenAI transcription model for lower latency and cost.",
+    },
+    {
+        "name": "gpt-4o-transcribe-diarize",
+        "description": "Transcription model with speaker diarization for multi-speaker audio.",
     },
     {
         "name": "whisper-1",

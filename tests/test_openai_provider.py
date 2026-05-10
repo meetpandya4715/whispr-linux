@@ -28,6 +28,18 @@ def test_openai_success(monkeypatch, tmp_path: Path) -> None:
     assert client.kwargs["data"]["model"] == "gpt-4o-transcribe"
 
 
+def test_diarize_model_omits_prompt(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr("whisprlinux.providers.openai.get_openai_key", lambda: "test-key")
+    audio = tmp_path / "a.wav"
+    audio.write_bytes(b"RIFF")
+    client = Client(httpx.Response(200, json={"text": "hello"}))
+    config = default_config().model_copy(update={"model": "gpt-4o-transcribe-diarize", "prompt": "English only"})
+
+    OpenAITranscriptionProvider(client).transcribe(audio, config)
+
+    assert client.kwargs["data"] == {"model": "gpt-4o-transcribe-diarize"}
+
+
 @pytest.mark.parametrize("status", [401, 429, 400])
 def test_openai_errors(monkeypatch, tmp_path: Path, status: int) -> None:
     monkeypatch.setattr("whisprlinux.providers.openai.get_openai_key", lambda: "test-key")

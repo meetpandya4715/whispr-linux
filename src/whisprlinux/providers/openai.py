@@ -13,6 +13,7 @@ from whisprlinux.secrets import get_openai_key
 class OpenAITranscriptionProvider:
     name = "openai"
     endpoint = "https://api.openai.com/v1/audio/transcriptions"
+    diarize_model = "gpt-4o-transcribe-diarize"
 
     def __init__(self, client: Any | None = None) -> None:
         self.client = client or httpx
@@ -24,7 +25,7 @@ class OpenAITranscriptionProvider:
         data: dict[str, str] = {"model": config.model}
         if config.language:
             data["language"] = config.language
-        if config.prompt:
+        if config.prompt and config.model != self.diarize_model:
             data["prompt"] = config.prompt
         headers = {"Authorization": f"Bearer {api_key}"}
         try:

@@ -25,6 +25,8 @@ def test_models_list_shows_transcription_models() -> None:
     result = CliRunner().invoke(app, ["models", "list"])
     assert result.exit_code == 0
     assert "gpt-4o-transcribe" in result.output
+    assert "gpt-4o-mini-transcribe" in result.output
+    assert "gpt-4o-transcribe-diarize" in result.output
     assert "whisper-1" in result.output
 
 
@@ -32,7 +34,7 @@ def test_models_choose_sets_model_by_number(tmp_path, monkeypatch) -> None:
     config_dir = tmp_path / "config"
     monkeypatch.setenv("WHISPRLINUX_CONFIG_DIR", str(config_dir))
 
-    result = CliRunner().invoke(app, ["models", "choose", "--number", "2", "--no-restart"])
+    result = CliRunner().invoke(app, ["models", "choose", "--number", "4", "--no-restart"])
 
     assert result.exit_code == 0
     assert "Updated model" in result.output
