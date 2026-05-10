@@ -1,0 +1,42 @@
+from pathlib import Path
+
+import pytest
+
+from whisprlinux.config import default_config, load_config, save_config, set_config_value
+
+
+def test_default_config() -> None:
+    config = default_config()
+    assert config.provider == "openai"
+    assert config.model == "gpt-4o-transcribe"
+    assert config.hotkey == "ctrl+super"
+    assert config.output_mode == "clipboard_and_paste"
+
+
+def test_save_load_and_nested_creation(tmp_path: Path) -> None:
+    path = tmp_path / "nested" / "config.toml"
+    save_config(default_config(), path)
+    assert path.exists()
+    assert load_config(path).sample_rate == 16000
+
+
+def test_set_config_value(tmp_path: Path) -> None:
+    path = tmp_path / "config.toml"
+    save_config(default_config(), path)
+    config = set_config_value("model", "whisper-1", path)
+    assert config.model == "whisper-1"
+
+
+def test_set_nested_provider_value(tmp_path: Path) -> None:
+    path = tmp_path / "config.toml"
+    save_config(default_config(), path)
+    set_config_value("providers.fake.text", "hello", path)
+    assert load_config(path).providers["fake"]["text"] == "hello"
+    assert "[providers.fake]" in path.read_text()
+
+
+def test_invalid_enum_value(tmp_path: Path) -> None:
+    path = tmp_path / "config.toml"
+    save_config(default_config(), path)
+    with pytest.raises(ValueError):
+        set_config_value("output_mode", "telepathy", path)

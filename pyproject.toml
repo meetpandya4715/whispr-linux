@@ -1,0 +1,35 @@
+[project]
+name = "whisprlinux"
+version = "0.1.0"
+description = "No-admin Ubuntu/X11 hold-to-dictate utility"
+readme = "README.md"
+authors = [
+    { name = "Meet Pandya", email = "meetpandya4715@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "httpx>=0.28.1",
+    "keyring>=25.7.0",
+    "platformdirs>=4.9.6",
+    "pydantic>=2.13.4",
+    "pynput>=1.8.1",
+    "rich>=15.0.0",
+    "typer>=0.25.1",
+]
+
+[project.scripts]
+whisprlinux = "whisprlinux.cli:app"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[build-system]
+requires = ["uv_build>=0.8.13,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-mock>=3.15.1",
+]
