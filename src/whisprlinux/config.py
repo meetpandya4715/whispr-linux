@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 ProviderName = Literal["openai", "fake"]
 OutputMode = Literal["clipboard", "clipboard_and_paste", "stdout"]
-PasteStrategy = Literal["auto", "ctrl_v", "ctrl_shift_v"]
+PasteStrategy = Literal["auto", "ctrl_v", "ctrl_shift_v", "shift_insert"]
 
 
 class AppConfig(BaseModel):

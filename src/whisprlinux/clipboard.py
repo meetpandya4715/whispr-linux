@@ -53,6 +53,8 @@ def paste_from_clipboard(config: AppConfig) -> None:
 
 
 def paste_hotkey(config: AppConfig) -> tuple[str, ...]:
+    if config.paste_strategy == "shift_insert":
+        return ("shift", "insert")
     if config.paste_strategy == "ctrl_shift_v":
         return ("ctrl", "shift", "v")
     if config.paste_strategy == "ctrl_v":
@@ -82,8 +84,9 @@ def press_hotkey(keys: Sequence[str]) -> None:
 
     keyboard = Controller()
     modifiers = {"ctrl": Key.ctrl, "shift": Key.shift}
+    special_keys = {"insert": Key.insert}
     held = [modifiers[key] for key in keys[:-1]]
-    key = keys[-1]
+    key = special_keys.get(keys[-1], keys[-1])
     for modifier in held:
         keyboard.press(modifier)
     try:

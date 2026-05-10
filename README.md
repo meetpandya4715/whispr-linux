@@ -42,6 +42,12 @@ uv run whisprlinux config set paste_strategy auto
 ```
 
 `paste_strategy = "auto"` uses `Ctrl+V` in browsers and editors, and `Ctrl+Shift+V` in terminal windows such as Ghostty and GNOME Terminal. You can force either behavior with `ctrl_v` or `ctrl_shift_v`.
+If terminal paste still does not trigger, use `shift_insert`, which many terminals and text fields accept:
+
+```bash
+uv run whisprlinux config set paste_strategy shift_insert
+uv run whisprlinux service restart
+```
 
 Secrets are stored through the desktop keyring using service `whisprlinux` and username `openai_api_key`. If no keyring is available, use `OPENAI_API_KEY` only for the current shell session.
 

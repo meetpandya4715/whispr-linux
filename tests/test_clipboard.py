@@ -74,6 +74,19 @@ def test_explicit_terminal_paste_strategy(monkeypatch) -> None:
     assert pressed == [("ctrl", "shift", "v")]
 
 
+def test_explicit_shift_insert_paste_strategy(monkeypatch) -> None:
+    pressed = []
+    config = default_config().model_copy(update={"paste_strategy": "shift_insert"})
+
+    monkeypatch.setattr(clipboard, "active_window_class", lambda: "google-chrome")
+    monkeypatch.setattr(clipboard.time, "sleep", lambda delay: None)
+    monkeypatch.setattr(clipboard, "press_hotkey", lambda keys: pressed.append(keys))
+
+    clipboard.paste_from_clipboard(config)
+
+    assert pressed == [("shift", "insert")]
+
+
 def test_active_window_class_parses_xprop(monkeypatch) -> None:
     def fake_run(args, **kwargs):
         if args == ["xprop", "-root", "_NET_ACTIVE_WINDOW"]:
